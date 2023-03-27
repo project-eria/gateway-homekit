@@ -34,6 +34,10 @@ github.com/miekg/dns v1.1.50/go.mod h1:e3IlAVfNqAllflbibAZEWOXOQ+Ynzk/dDozDxY7Xn
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/project-eria/eria-core v1.1.0 h1:FPsnHfQzjmvzfPdBd2N7odgDMaAZJTANBPK/m1lTgiU=
+github.com/project-eria/eria-core v1.1.0/go.mod h1:tQ95aWDM2DpJak2l8dNLB+fA8aoDNa1F1od5sf4THv0=
+github.com/project-eria/go-wot v1.1.0 h1:6LTo4vy29mk2kOSrmNK1t9xiJWPSsbOXRns6krURNYE=
+github.com/project-eria/go-wot v1.1.0/go.mod h1:92yYjZf0uEoc6LbBHHewQr69XCks7NIczk+IWTZKHvI=
 github.com/rs/xid v1.4.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/rs/zerolog v1.28.0 h1:MirSo27VyNi7RJYP3078AA1+Cyzd2GB66qy3aUHvsWY=
 github.com/rs/zerolog v1.28.0/go.mod h1:NILgTygv/Uej1ra5XxGf82ZFSLk58MFGAUS2o6usyD0=
