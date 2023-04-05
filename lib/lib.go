@@ -27,8 +27,12 @@ type capability interface {
 //	})
 func NewAccessory(t *consumer.ConsumedThing, deviceType string, deviceProperty string) (*accessory.A, error) {
 	details := t.GetThingDescription()
+	name := details.Description
+	if deviceProperty != "" {
+		name = deviceProperty + " - " + name
+	}
 	info := accessory.Info{
-		Name:         details.Description,
+		Name:         name,
 		Manufacturer: "ERIA",
 		SerialNumber: details.ID,
 	}

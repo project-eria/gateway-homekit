@@ -18,16 +18,17 @@ func newLampBasic(info accessory.Info, t *consumer.ConsumedThing) (*lampBasic, *
 		zlog.Error().Err(err).Msg("[main] Can't read lamp state")
 	} else {
 		state := data.(bool)
+		zlog.Trace().Str("name", info.Name).Bool("value", state).Msg("[main] Set lamp initial value")
 		acc.Lightbulb.On.SetValue(state)
 	}
 	acc.Lightbulb.On.OnValueRemoteUpdate(func(state bool) {
-		zlog.Trace().Str("name", info.Name).Bool("on", state).Msg("[main] Received update from Homekit")
+		zlog.Trace().Str("name", info.Name).Bool("on", state).Msg("[main] Received Lamp update from Homekit")
 		t.InvokeAction("toggle", nil)
 	})
 
 	t.ObserveProperty("on", func(value interface{}, err error) {
 		on := value.(bool)
-		zlog.Trace().Str("name", info.Name).Bool("on", on).Msg("[main] Received update from thing device")
+		zlog.Trace().Str("name", info.Name).Bool("on", on).Msg("[main] Received Lamp update from thing device")
 		acc.Lightbulb.On.SetValue(on)
 	})
 	return &lampBasic{accessory: acc, ConsumedThing: t}, acc.A
