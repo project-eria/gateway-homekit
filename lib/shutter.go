@@ -3,43 +3,25 @@ package lib
 import (
 	"github.com/brutella/hap/accessory"
 	"github.com/brutella/hap/characteristic"
+	"github.com/brutella/hap/service"
 	"github.com/project-eria/go-wot/consumer"
 	zlog "github.com/rs/zerolog/log"
 )
 
 type shutterBasic struct {
-	accessory *accessory.WindowCovering
 	*consumer.ConsumedThing
+	accessory *accessory.WindowCovering
 }
 
 func newShutterBasic(info accessory.Info, t *consumer.ConsumedThing) (*shutterBasic, *accessory.A) {
 	acc := accessory.NewWindowCovering(info)
-	data, err := t.ReadProperty("position")
-	if err != nil {
-		zlog.Error().Err(err).Msg("[main] Can't read shutter state")
-	} else {
-		position := int(data.(float64))
-		zlog.Trace().Str("name", info.Name).Int("value", position).Msg("[main] Set shutter initial value")
-
-		acc.WindowCovering.CurrentPosition.SetValue(position)
-		acc.WindowCovering.TargetPosition.SetValue(position)
-		acc.WindowCovering.PositionState.SetValue(characteristic.PositionStateStopped)
-	}
-
-	acc.WindowCovering.TargetPosition.OnValueRemoteUpdate(func(value int) {
-		zlog.Trace().Str("name", info.Name).Int("position", value).Msg("[main] Received shutter update from Homekit")
-		current := acc.WindowCovering.CurrentPosition.Value()
-		if value > current {
-			acc.WindowCovering.PositionState.SetValue(characteristic.PositionStateIncreasing)
-		} else if value < current {
-			acc.WindowCovering.PositionState.SetValue(characteristic.PositionStateDecreasing)
-		}
+	initPosition(acc.WindowCovering, info, t, func(windowCovering *service.WindowCovering, t *consumer.ConsumedThing, value int) {
 		if value == 100 {
 			t.InvokeAction("open", nil)
-			acc.WindowCovering.TargetPosition.SetValue(100)
+			windowCovering.TargetPosition.SetValue(100)
 		} else if value == 0 {
 			t.InvokeAction("close", nil)
-			acc.WindowCovering.TargetPosition.SetValue(0)
+			windowCovering.TargetPosition.SetValue(0)
 		}
 	})
 
@@ -65,32 +47,16 @@ type shutterPosition struct {
 
 func newShutterPosition(info accessory.Info, t *consumer.ConsumedThing) (*shutterPosition, *accessory.A) {
 	acc := accessory.NewWindowCovering(info)
-	data, err := t.ReadProperty("position")
-	if err != nil {
-		zlog.Error().Err(err).Msg("[main] Can't read shutter position")
-	} else {
-		position := int(data.(float64))
-		zlog.Trace().Str("name", info.Name).Int("value", position).Msg("[main] Set shutter initial value")
-
-		acc.WindowCovering.CurrentPosition.SetValue(position)
-		acc.WindowCovering.TargetPosition.SetValue(position)
-		acc.WindowCovering.PositionState.SetValue(characteristic.PositionStateStopped)
-	}
-
-	acc.WindowCovering.TargetPosition.OnValueRemoteUpdate(func(value int) {
-		current := acc.WindowCovering.CurrentPosition.Value()
-		if value > current {
-			acc.WindowCovering.PositionState.SetValue(characteristic.PositionStateIncreasing)
-		} else if value < current {
-			acc.WindowCovering.PositionState.SetValue(characteristic.PositionStateDecreasing)
-		}
-
+	initPosition(acc.WindowCovering, info, t, func(windowCovering *service.WindowCovering, t *consumer.ConsumedThing, value int) {
 		if value == 100 {
 			t.InvokeAction("open", nil)
+			windowCovering.TargetPosition.SetValue(100)
 		} else if value == 0 {
 			t.InvokeAction("close", nil)
+			windowCovering.TargetPosition.SetValue(0)
 		} else {
 			t.InvokeAction("setPosition", value)
+			windowCovering.TargetPosition.SetValue(value)
 		}
 	})
 
@@ -104,4 +70,29 @@ func newShutterPosition(info accessory.Info, t *consumer.ConsumedThing) (*shutte
 	})
 
 	return &shutterPosition{accessory: acc, ConsumedThing: t}, acc.A
+}
+
+func initPosition(windowCovering *service.WindowCovering, info accessory.Info, t *consumer.ConsumedThing, processValue func(*service.WindowCovering, *consumer.ConsumedThing, int)) {
+	data, err := t.ReadProperty("position")
+	if err != nil {
+		zlog.Error().Err(err).Msg("[main] Can't read shutter position")
+	} else {
+		position := int(data.(float64))
+		zlog.Trace().Str("name", info.Name).Int("value", position).Msg("[main] Set shutter initial value")
+
+		windowCovering.CurrentPosition.SetValue(position)
+		windowCovering.TargetPosition.SetValue(position)
+		windowCovering.PositionState.SetValue(characteristic.PositionStateStopped)
+	}
+
+	windowCovering.TargetPosition.OnValueRemoteUpdate(func(value int) {
+		zlog.Trace().Str("name", info.Name).Int("position", value).Msg("[main] Received shutter update from Homekit")
+		current := windowCovering.CurrentPosition.Value()
+		if value > current {
+			windowCovering.PositionState.SetValue(characteristic.PositionStateIncreasing)
+		} else if value < current {
+			windowCovering.PositionState.SetValue(characteristic.PositionStateDecreasing)
+		}
+		processValue(windowCovering, t, value)
+	})
 }
