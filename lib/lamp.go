@@ -104,7 +104,7 @@ func setBrightness(accBrightness *characteristic.Brightness, info accessory.Info
 		t.InvokeAction("fade", brightness)
 	})
 	t.ObserveProperty("brightness", func(value interface{}, err error) {
-		brightness := value.(int)
+		brightness := int(value.(float64))
 		zlog.Trace().Str("name", info.Name).Int("brightness", brightness).Msg("[main] Received Lamp update from thing device")
 		accBrightness.SetValue(brightness)
 	})
